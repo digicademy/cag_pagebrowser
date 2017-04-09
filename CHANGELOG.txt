@@ -1,0 +1,73 @@
+3.0.0
+		* Refactoring for TYPO3 7.6.0-8.7.99
+
+2.0.1
+		* Set TYPO3 version dependency to 4.5.0-6.2.99
+
+2.0.1
+		* Bugfix: Pagebrowser icon not shown in TYPO3 Versions 6+
+		* Set TYPO3 version dependency to 4.5.0-6.1.99
+		* Fixed PHP warning thrown for in_array in function treePrevNext (thx. Juergen Immes for reporting)
+		* Set TYPO3 version dependencies: Minimum required TYPO3 version is 4.5, maximum 6.0
+		* Cleanup of ext_tables.php
+
+2.0.0
+		* New feature: Rewritten pagebrowser TS script (v.2) - much cleaner, more performant and easier to adapt
+		* New feature (only v.2): Tree Prev/Next - navigate through the whole pagetree from first to last page regardless of levels (thx Heiko Hänsge for the idea)
+		* New feature (only v.2): configuration of pagenumber elements integrated into the script, no need for additional TS inclusion
+		* Change (only v.2): HTML output is simplified and has a more consistent class scheme now
+		* Change (only v.2): pagebrowser elements now remain stable (they don't disappear anymore if there is no according page)
+		* Change (only v.2): new order of pagebrowser elements is INDEX | SUBSECTION | FIRST | PREVIUOUS | PAGENUMBERS | NEXT | LAST
+		* Revised manual
+
+1.2.2
+		* Bugfix: Pagebrowser icon not shown in contains plugin select box
+		* Bugfix #27507: Usage of $ICON_TYPES is deprecated since 4.4 (thx Eckhard M. Jäger)
+		* Bugfix #3713: The property "ATagParams" in the link to FIRST page was set at the wrong place (thx Maria Vassileva)
+		* Bugfix #8000: Navigation title output instead of number (thx Simon Schaufelberger)
+
+1.2.1
+		* Bugfix: Display of pagebrowser doktype was broken in TYPO3 4.2.1
+		* Change: Use includeLibs instead of ST43
+
+1.2.0
+		* New feature: Insert a section with numbered pages. Thanks to Erich Bircher for the idea.
+
+1.1.1
+		* Bugfix for use with Templavoila: Data retrival using $this->cObj->data does not work within Templavoila. Now done using $this->cObj->getData. Thanks to Paul Vetch for feedback.
+
+1.1.0
+		* Completely revised version.
+		* Several things concerning the configuration had to be changed. Please have a look at the "Update" section in this manual.
+		* New feature: Pagebrowser can now be configured to use either the doktype or the "Contains plugin" field in the page properties. This means that you are able to insert paginations and set the doktype of the page to something different.
+		* New feature: The browser mode (standard/recursive) is now configurable in the TS template and not globally in the EM.
+		* New feature: You can now define a list of ids for pages that will be excluded from the pagebrowser in the .excludeUidList property.
+		* Revised entry link feature. Thanks to Costatino Lattarulo for the feature request.
+		* Bugfix: Browseword configuration for link to subsection in constand editor was messed up. Thanks to Bernd Wilke
+
+1.0.0
+		* Stable Version
+		* New Feature: Pagebrowser can now operate recursively for whole branches (to be set in EM)
+		* New Feature: Section link can be inserted to FIRST page in a subsection (to be set in EM)
+		* Pagebrowser now respects (and excludes) hidden and "Hide in menu" pages
+		* Several small bugfixes (eg. no "" for title attributes etc.)
+		* Revised manual
+
+0.1.5
+		* getting ready for t3skin
+
+0.1.3
+		* Changed the wording for index & browseword features in CONSTAT EDITOR. Now it should be clear that you can disable those features by setting their values to 0.
+		* The word for the indexlink is now configurable like all other browsewords with plugin.tx_cagpagebrowser.indexword(thx to Stefan Dumont for the feature request)
+
+0.1.2
+		* Rewrite of whole TS to so that it is now possible to exclude certain doktypes from the pagination (thx to Boris Podzeit for the feature request)
+		* Made the basic wraps of the pagination configurable with Constant Editor
+		* Revised manual
+
+0.1.1
+		* Correction of a minor TS bug: in some scenarios the "looping" did not work properly because the select query for the page sorting ended up with an empty value
+		* Revised manual (now with a section for templavoila)
+
+0.1.0
+		* Initial version (Thx. To Jochen Rieger for the nice icons)

@@ -1,0 +1,32 @@
+{
+    "name": "digicademy/cag_pagebrowser",
+    "type": "typo3-cms-extension",
+    "description": "Easy pagination for your TYPO3 website",
+    "homepage": "http://www.digitale-akademie.de",
+    "authors": [
+        {
+          "name": "Torsten Schrade",
+          "email": "Torsten.Schrade@adwmainz.de",
+          "role": "Developer",
+          "homepage": "http://www.digitale-akademie.de"
+        }
+    ],
+    "license": ["GPL-2.0+"],
+    "keywords": ["TYPO3", "Pagination", "Navigation"],
+    "support": {
+        "issues": "https://github.com/digicademy/cag_pagebrowser/issues"
+    },
+    "version": "3.0.0",
+    "require": {
+        "typo3/cms-core": ">=7.6.0 || <=8.7.99"
+    },
+    "replace": {
+        "cag_pagebrowser": "self.version",
+        "typo3-ter/cag_pagebrowser": "self.version"
+    },
+    "autoload": {
+        "psr-4": {
+          "Digicademy\\CagPagebrowser\\": "Classes/"
+        }
+    }
+}

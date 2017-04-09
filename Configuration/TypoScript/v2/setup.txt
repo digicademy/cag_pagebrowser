@@ -1,0 +1,365 @@
+##########################################################
+# TypoScript Config for Pagebrowser v.2                  #
+##########################################################
+
+# pagebrowser COA for insertion into TS templates
+plugin.tx_cagpagebrowser = COA
+plugin.tx_cagpagebrowser {
+
+    ## REGISTERS ##
+
+    # contains registers that load all uids and page titles for link generation
+    5 = COA
+    
+    # uid registers
+    5.10 = LOAD_REGISTER
+    5.10 {
+
+        # list of uids that will be excluded from the navigation
+        excludeUids.cObject = TEXT
+        excludeUids.cObject {
+            value = {$plugin.tx_cagpagebrowser.excludeUidList}
+            required = 1
+            wrap = AND uid NOT IN (|)
+        }    
+
+        # uid of current index page
+        index.cObject = TEXT
+        index.cObject {
+            data = page:pid
+        }
+
+        # if the current page has subpages, get the uid of the page with the lowest sorting in the subsection
+        subsection.cObject = CONTENT
+        subsection.cObject {
+            table = pages
+            select {
+                pidInList.data = page:uid
+                orderBy = sorting
+                where.dataWrap = doktype NOT IN ({$plugin.tx_cagpagebrowser.dtypes}) AND deleted=0 AND hidden=0 AND nav_hide=0 {register : excludeUids}
+                max = 1
+            }        
+            renderObj = TEXT
+            renderObj.data = field:uid
+            
+            # will only be executed in recursive mode and if there are subpages
+            stdWrap {        
+                if {
+                    isTrue.numRows {
+                        table = pages
+                        select < plugin.tx_cagpagebrowser.subsection.cObject.select
+                    }
+                    value = rec
+                    equals = {$plugin.tx_cagpagebrowser.browserMode}
+                }
+            }        
+        }
+
+        # get uid of first page in current section
+        first.cObject = CONTENT
+        first.cObject {
+            table = pages
+            select {
+                selectFields = uid
+                pidInList.data = page:pid
+                orderBy = sorting
+                where.dataWrap = doktype NOT IN ({$plugin.tx_cagpagebrowser.dtypes}) AND deleted=0 AND hidden=0 AND nav_hide=0 {register : excludeUids}
+                max = 1
+            }
+            renderObj = TEXT
+            renderObj.field = uid
+        }
+        
+        # get uid of last page in current section
+        last.cObject = CONTENT
+        last.cObject < .first.cObject
+        last.cObject.select.begin = total-1
+        
+        # get uid of previous page to current page
+        previous.cObject = CONTENT
+        previous.cObject < .first.cObject
+        previous.cObject {
+            select {
+                where.dataWrap = sorting < {page:sorting} AND deleted=0 AND hidden=0 AND nav_hide=0 {register : excludeUids}
+                begin = total-1
+            }
+            
+            # if on last page and in browserLoop, insert uid of first page in section instead
+            stdWrap.override {
+                if {
+                    isTrue = {$plugin.tx_cagpagebrowser.browserLoop}
+                    value.data = register:first
+                    equals.data = TSFE:id
+                }
+                cObject < plugin.tx_cagpagebrowser.5.10.last.cObject
+            }
+        }
+        
+        # get uid of next page to current page
+        next.cObject = CONTENT
+        next.cObject < .first.cObject
+        next.cObject {
+            table = pages
+            select.where.dataWrap = sorting > {page:sorting} AND deleted=0 AND hidden=0 AND nav_hide=0 {register : excludeUids}
+            
+            # if on first page and in browserLoop, insert uid of last page in section instead
+            stdWrap.override {
+                if {
+                    isTrue = {$plugin.tx_cagpagebrowser.browserLoop}
+                    value.data = register:last
+                    equals.data = TSFE:id
+                }
+                cObject < plugin.tx_cagpagebrowser.5.10.first.cObject
+            }
+        }
+    }
+    
+    # page title registers
+    5.20 = LOAD_REGISTER
+    5.20 {    
+
+        indexTitle {
+            cObject = TEXT
+            cObject.dataWrap = DB:pages:{register:index}:title
+            wrap = {|}
+            insertData = 1
+        }
+        
+        subsectionTitle < .indexTitle
+        subsectionTitle.cObject.dataWrap = DB:pages:{register:subsection}:title
+        
+        firstTitle < .indexTitle
+        firstTitle.cObject.dataWrap = DB:pages:{register:first}:title
+        
+        lastTitle < .indexTitle
+        lastTitle.cObject.dataWrap = DB:pages:{register:last}:title        
+        
+        previousTitle < .indexTitle
+        previousTitle.cObject {
+            dataWrap >
+            value = DB:pages:{register:previous}:title
+            insertData = 1
+            
+            # if not in browserLoop and no browsewords set, insert title of first page when on first page (otherwise element would be empty)
+            override = DB:pages:{register:first}:title
+            override.if {
+                isFalse.cObject = TEXT
+                isFalse.cObject {
+                    value = {$plugin.tx_cagpagebrowser.browsewords} + {$plugin.tx_cagpagebrowser.browserLoop}
+                    prioriCalc = 1
+                }
+                value.data = register:first
+                equals.data = TSFE:id
+            }            
+        }
+        
+        nextTitle < .indexTitle
+        nextTitle.cObject {
+            dataWrap >
+            value = DB:pages:{register:next}:title
+            insertData = 1
+            
+            # if not in browserLoop and no browsewords set, insert title of last page when on last page (otherwise element would be empty)
+            override = DB:pages:{register:last}:title
+            override.if {
+                isFalse.cObject = TEXT
+                isFalse.cObject {
+                    value = {$plugin.tx_cagpagebrowser.browsewords} + {$plugin.tx_cagpagebrowser.browserLoop}
+                    prioriCalc = 1
+                }
+                value.data = register:last
+                equals.data = TSFE:id
+            }
+        }
+        
+    }
+    
+    ## BROWSER ELEMENTS ##
+    
+    # index element
+    10 = TEXT
+    10.wrap = {$plugin.tx_cagpagebrowser.wrapIndex}
+    10 {
+        # get page title
+        data = register:indexTitle
+
+        # build link to the INDEX page
+        typolink.parameter.data = register:index
+        typolink.ATagParams.dataWrap = title="{register:indexTitle}"
+
+        # pagetitle overridden with browseword if true
+        override {
+            cObject = TEXT
+            cObject.value = {$plugin.tx_cagpagebrowser.indexword}
+            if.isTrue = {$plugin.tx_cagpagebrowser.browsewords}
+        }
+    }
+    
+    # subsection element
+    15 = TEXT
+    15.wrap = {$plugin.tx_cagpagebrowser.wrapSubsection}
+    15 {
+        # get page title
+        data = register:subsectionTitle
+
+        # build link to the first page in the subsection
+        typolink.parameter.data = register:subsection
+        typolink.ATagParams.dataWrap = title="{register:subsectionTitle}"
+
+        # pagetitle overridden with browseword if true
+        override < plugin.tx_cagpagebrowser.10.override
+        override.cObject.value = {$plugin.tx_cagpagebrowser.subsection}
+        
+        # only insert this element if there are subpages
+        if.isTrue.data = register:subsection
+    }    
+
+    # first element
+    20 = TEXT
+    20.wrap = {$plugin.tx_cagpagebrowser.wrapFirst}
+    20 {
+        # get FIRST page title
+        data = register:firstTitle
+
+        # build link to first page - if not in browserLoop mode, link to first page will only be generated if not on first page
+        typolink.parameter.cObject = TEXT
+        typolink.parameter.cObject {
+            data = register:first
+            if {
+                value.data = register:first
+                equals.data = TSFE:id
+                isFalse = {$plugin.tx_cagpagebrowser.browserLoop}
+                negate = 1
+            }
+        }
+        typolink.ATagParams.dataWrap = title="{register:firstTitle}"
+
+        # pagetitle overridden with browseword if is true
+        override < plugin.tx_cagpagebrowser.10.override
+        override.cObject.value = {$plugin.tx_cagpagebrowser.first}
+    }
+    
+    # previous
+    30 = TEXT
+    30.wrap = {$plugin.tx_cagpagebrowser.wrapPrevious}
+    30 {
+        # get PREVIOUS page title
+        data = register:previousTitle
+
+        # build link to the PREVIOUS page
+        typolink.parameter.cObject = TEXT
+        typolink.parameter.cObject {
+            data = register:previous
+            if {
+                value.data = register:previous
+                equals.data = TSFE:id
+                negate = 1
+            }
+        }
+        typolink.ATagParams.dataWrap = title="{register:previousTitle}"
+
+        # pagetitle overridden with browseword if is true
+        override < plugin.tx_cagpagebrowser.10.override
+        override.cObject.value = {$plugin.tx_cagpagebrowser.previous}
+    }
+    
+    # pagenumbers
+    40 = HMENU
+    40 {
+        # only insert if enabled in constant editor
+        stdWrap.if.isTrue = {$plugin.tx_cagpagebrowser.pageNumbers}
+
+        special = directory
+        special.value.data = page:pid
+
+        excludeUidList = {$plugin.tx_cagpagebrowser.excludeUidList}
+        excludeDoktypes = {$plugin.tx_cagpagebrowser.dtypes}
+
+        1 = TMENU
+        1 {
+
+            noBlur = 1
+
+            itemArrayProcFunc = Digicademy\CagPagebrowser\Frontend\Plugin->pageNumbers
+            stepSize = {$plugin.tx_cagpagebrowser.pagenumbers.stepSize}
+            useNumbering = {$plugin.tx_cagpagebrowser.pagenumbers.useNumbering}
+
+            wrap = {$plugin.tx_cagpagebrowser.pagenumbers.wrapPageNumbers}
+
+            NO.allWrap = {$plugin.tx_cagpagebrowser.pagenumbers.wrapSingleNumber}
+
+            CUR < .NO
+            CUR = 1
+            CUR.doNotLinkIt = 1
+        }
+        
+    }        
+
+    # next
+    50 = TEXT
+    50.wrap = {$plugin.tx_cagpagebrowser.wrapNext}
+    50 {
+        # get PREVIOUS page title
+        data = register:nextTitle
+
+        # build link to the NEXT page
+        typolink.parameter.cObject = TEXT
+        typolink.parameter.cObject {
+            data = register:next
+            if {
+                value.data = register:next
+                equals.data = TSFE:id
+                negate = 1
+            }
+        }
+        typolink.ATagParams.dataWrap = title="{register:nextTitle}"
+
+        # pagetitle overridden with browseword if is true
+        override < plugin.tx_cagpagebrowser.10.override
+        override.cObject.value = {$plugin.tx_cagpagebrowser.next}
+    }
+
+    # last
+    60 = TEXT
+    60.wrap = {$plugin.tx_cagpagebrowser.wrapLast}
+    60 {
+        # get LAST page title
+        data = register:lastTitle
+
+        # if not in browserLoop mode links to last/next page will NOT be generated on last page of tree branch        
+        typolink.parameter.cObject = TEXT
+        typolink.parameter.cObject {
+            data = register:last
+            if {
+                value.data = register:last 
+                equals.data = TSFE:id
+                isFalse = {$plugin.tx_cagpagebrowser.browserLoop}
+                negate = 1
+            }
+        }        
+        typolink.ATagParams.dataWrap = title="{register:lastTitle}"
+
+        # pagetitle overridden with browseword if is true
+        override < plugin.tx_cagpagebrowser.10.override
+        override.cObject.value = {$plugin.tx_cagpagebrowser.last}
+    }
+
+    # pagebrowser insertion: tests if the pagebrowser may be inserted on current page or not
+    stdWrap {
+        if.value = 1
+        if.equals.cObject = USER
+        if.equals.cObject {
+            userFunc = Digicademy\CagPagebrowser\Frontend\Plugin->main
+            browserMode = {$plugin.tx_cagpagebrowser.browserMode}
+            excludeUidList = {$plugin.tx_cagpagebrowser.excludeUidList}
+        }
+        wrap = {$plugin.tx_cagpagebrowser.wrapWhole}
+    }
+
+    _CSS_DEFAULT_STYLE (
+        div.cag_pagebrowser {margin: 2em 0 1em 0;}
+        div.cag_pagebrowser ul {list-style-type: none; margin: 0; padding: 0;}
+        div.cag_pagebrowser ul li {display: inline-block; text-align: center; margin: 0 1em;}
+        div.cag_pagebrowser a {font-size: 1em;}
+    )
+}

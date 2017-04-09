@@ -1,0 +1,8 @@
+#cat=plugin.cag_pagebrowser.entryLink/enable/a; type=wrap; label= Wrap: This wraps the link from a pagebrowser page to the FIRST page in the SUBSECTION (has to be inserted via TS first!!)
+plugin.tx_cagpagebrowser.entryLink.wrap = <div class="cag_pagebrowser">|</div>
+
+#cat=plugin.cag_pagebrowser.entryLink/enable/b; type=string; label= Exlude uids: Comma separated list of page ids to exlude from the entry link generation
+plugin.tx_cagpagebrowser.entryLink.excludeUidList =
+
+#cat=plugin.cag_pagebrowser.entryLink/enable/c; type=string; label= Browseword (ENTRY LINK): Alternative word for the entry link which will override the pagetitle
+plugin.tx_cagpagebrowser.entryLink.word = Enter section

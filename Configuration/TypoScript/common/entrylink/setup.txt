@@ -1,0 +1,49 @@
+plugin.tx_cagpagebrowser = COA
+plugin.tx_cagpagebrowser {
+
+    entryLink = TEXT
+    entryLink.wrap = {$plugin.tx_cagpagebrowser.entryLink.wrap}
+    entryLink {
+        # get the title of the first valid subpage in the SECTION
+        cObject = CONTENT
+        cObject {
+            table = pages
+            # this selects the lowest valid page among the subpages of the SECTION
+            select {
+                pidInList.data = page:uid
+                orderBy = sorting
+                where = doktype NOT IN ({$plugin.tx_cagpagebrowser.dtypes}) AND deleted=0 AND hidden=0 AND nav_hide=0
+                max = 1
+                }
+            renderObj = TEXT
+            renderObj.data = field:title
+        }
+        # build the link to the FIRST sub(page)
+        typolink.parameter.cObject < plugin.tx_cagpagebrowser.entryLink.cObject
+        typolink.parameter.cObject.renderObj.data = field:uid
+        typolink.ATagParams = title="{$plugin.tx_cagpagebrowser.entryLink.word}"
+
+        # pagetitle overridden with browseword if true
+        cObject.stdWrap {
+
+            override.cObject = TEXT
+            override.cObject.value = {$plugin.tx_cagpagebrowser.entryLink.word}
+            override.cObject.wrap = <span class="entrylink"> | </span>
+
+            override.if {
+                value = 1
+                equals = {$plugin.tx_cagpagebrowser.browsewords}
+            }
+        }
+        # execute the entry link part only if we ARE on a PAGEBROWSER page
+        if {
+            value = 1
+            equals.cObject = USER
+            equals.cObject {
+                userFunc = Digicademy\CagPagebrowser\Frontend\Plugin->entryLink
+                browserMode = {$plugin.tx_cagpagebrowser.browserMode}
+                excludeUidList = {$plugin.tx_cagpagebrowser.entryLink.excludeUidList}
+            }
+        }
+    }
+}

@@ -1,0 +1,15 @@
+# wraps
+plugin.tx_cagpagebrowser.wrapIndex = <li class="index">|</li>
+plugin.tx_cagpagebrowser.wrapSubsection = <li class="subsection">|</li>
+
+#cat=plugin.cag_pagebrowser.pagenumbers/enable/a; type=options[0,1]; label= Use numbering: If activated, pagetitles are overriden with numbers
+plugin.tx_cagpagebrowser.pagenumbers.useNumbering = 1
+
+#cat=plugin.cag_pagebrowser.pagenumbers/enable/b; type=int+; label= Step size: Define the size of the pagesets to be shown
+plugin.tx_cagpagebrowser.pagenumbers.stepSize =
+
+#cat=plugin.cag_pagebrowser.pagenumbers/others/a; type=wrap; label= Pagenumber wrap: This wraps the part with the pagenumbers
+plugin.tx_cagpagebrowser.pagenumbers.wrapPageNumbers = <li class="pagenumbers"><ul>|</ul></li>
+
+#cat=plugin.cag_pagebrowser.pagenumbers/others/b; type=wrap; label= Single number wrap: This wraps the single numbers
+plugin.tx_cagpagebrowser.pagenumbers.wrapSingleNumber = <li class="number">|</li>

@@ -1,0 +1,74 @@
+# enable features
+
+#cat=plugin.cag_pagebrowser/enable/a; type=string; label= Forbidden Doktypes: Define the list of doktypes that are excluded from the pagination (1-standard, 2-advanced, 3-ext.url, 4-shortcut, 5-n/in menu, 6-BE user, 7-mountpoint, 21-pagebrowser, 199-Spacer, 254-Sysfolder, 255-Recycler); No spaces between commas!!!
+plugin.tx_cagpagebrowser.dtypes = 3,4,5,6,7,199,254,255
+
+#cat=plugin.cag_pagebrowser/enable/b; type=options[std,rec]; label= Browser mode: Operate in standard or recursive mode (cf. manual)
+plugin.tx_cagpagebrowser.browserMode = std
+
+#cat=plugin.cag_pagebrowser/enable/c; type=string; label= Exlude uids: Comma separated list of page ids on which no pagebrowser will be inserted
+plugin.tx_cagpagebrowser.excludeUidList =
+
+#cat=plugin.cag_pagebrowser/enable/d; type=options[0,1]; label= Browsewords: Normally pagetitles are overriden by browsewords (1 - 6). If you set this to 0, you disable that behaviour
+plugin.tx_cagpagebrowser.browsewords = 1
+
+#cat=plugin.cag_pagebrowser/enable/e; type=string; label= Browseword 1 (PREVIOUS): Alternative word for link to previous page
+plugin.tx_cagpagebrowser.previous = previous
+
+#cat=plugin.cag_pagebrowser/enable/f; type=string; label= Browseword 2 (NEXT): Alternative word for link to next page
+plugin.tx_cagpagebrowser.next = next
+
+#cat=plugin.cag_pagebrowser/enable/g; type=string; label= Browseword 3 (LAST): Alternative word for link to last page in section (only shown on first page in section)
+plugin.tx_cagpagebrowser.last = last
+
+#cat=plugin.cag_pagebrowser/enable/h; type=string; label= Browseword 4 (FIRST): Alternative word for link to first page in section (only shown on last page in section)
+plugin.tx_cagpagebrowser.first = first
+
+#cat=plugin.cag_pagebrowser/enable/i; type=string; label= Browseword 5 (INDEX): Alternative word for indexlink
+plugin.tx_cagpagebrowser.indexword = index
+
+#cat=plugin.cag_pagebrowser/enable/j; type=string; label= Browseword 6 (SUBSECTION): Alternative word for subsection link
+plugin.tx_cagpagebrowser.subsection = subsection
+
+#cat=plugin.cag_pagebrowser/enable/k; type=options[0,1]; label= Looping: If enabled, previous/next elements of the browser will link to last/first elements if on first or last page respectively
+plugin.tx_cagpagebrowser.browserLoop = 0
+
+#cat=plugin.cag_pagebrowser/enable/l; type=options[0,1]; label= Page numbers: If enabled, pages of the section are collected and inserted as numbers between previous and next elements (cf. according config options)
+plugin.tx_cagpagebrowser.pageNumbers = 0
+
+# wraps
+
+#cat=plugin.cag_pagebrowser/others/a; type=wrap; label= GENERAL Wrap: This wraps the whole pagination
+plugin.tx_cagpagebrowser.wrapWhole = <div class="cag_pagebrowser"><ul>|</ul></div>
+
+#cat=plugin.cag_pagebrowser/others/b; type=wrap; label= LAST Wrap: This wraps the link to the LAST page in the current SECTION
+plugin.tx_cagpagebrowser.wrapLast = <li class="last element">|</li>
+
+#cat=plugin.cag_pagebrowser/others/c; type=wrap; label= PREVIOUS wrap: This wraps the link to the PREVIOUS page in the current SECTION
+plugin.tx_cagpagebrowser.wrapPrevious = <li class="previous element">|</li>
+
+#cat=plugin.cag_pagebrowser/others/d; type=wrap; label= INDEX wrap: This wraps the INDEX link and the divider
+plugin.tx_cagpagebrowser.wrapIndex = <li class="index element">|</li>
+
+#cat=plugin.cag_pagebrowser/others/f; type=wrap; label= NEXT wrap: This wraps the link to the NEXT page in the current SECTION
+plugin.tx_cagpagebrowser.wrapNext = <li class="next element">|</li>
+
+#cat=plugin.cag_pagebrowser/others/g; type=wrap; label= FIRST wrap: This wraps the link to the FIRST page in the current SECTION
+plugin.tx_cagpagebrowser.wrapFirst = <li class="first element">|</li>
+
+#cat=plugin.cag_pagebrowser/others/h; type=wrap; label= SUBSECTION wrap: This wraps the link to the FIRST valid page in the SUBSECTION of the current page
+plugin.tx_cagpagebrowser.wrapSubsection = <li class="subsection element">|</li>
+
+# pagenumbers
+
+#cat=plugin.cag_pagebrowser.pagenumbers/enable/a; type=options[0,1]; label= Use numbering: If activated, pagetitles are overriden with numbers
+plugin.tx_cagpagebrowser.pagenumbers.useNumbering = 1
+
+#cat=plugin.cag_pagebrowser.pagenumbers/enable/b; type=int+; label= Step size: Define the size of the pagesets to be shown
+plugin.tx_cagpagebrowser.pagenumbers.stepSize =
+
+#cat=plugin.cag_pagebrowser.pagenumbers/others/a; type=wrap; label= Pagenumber wrap: This wraps the part with the pagenumbers
+plugin.tx_cagpagebrowser.pagenumbers.wrapPageNumbers = <li class="pagenumbers element"><ul>|</ul></li>
+
+#cat=plugin.cag_pagebrowser.pagenumbers/others/b; type=wrap; label= Single number wrap: This wraps the single numbers
+plugin.tx_cagpagebrowser.pagenumbers.wrapSingleNumber = <li class="number element">|</li>

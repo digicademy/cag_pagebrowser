@@ -1,0 +1,67 @@
+plugin.tx_cagpagebrowser = COA
+plugin.tx_cagpagebrowser {
+
+    # set index part to be first
+    6 < .30
+    # set subsection part to be second
+    8 < .25
+
+    # move LAST part to last position & link it only when not on last page
+    51 < .10
+    51.typolink.parameter.if < .40.if
+    51.if >
+
+    # move FIRST part to first position & link it only when not on first page
+    10 < .50
+    50 >
+    10.typolink.parameter.if < .20.if
+    10.if >
+
+    # PREVIOUS part only linked when not on first page
+    20.typolink.parameter.if < .20.if
+    20.if >
+
+    # remove former subsection part and insert numbering
+    25 >
+    25 = HMENU
+    25 {
+
+        special = directory
+        special.value.data = page:pid
+
+        excludeUidList = {$plugin.tx_cagpagebrowser.excludeUidList}
+        excludeDoktypes = {$plugin.tx_cagpagebrowser.dtypes}
+
+        1 = TMENU
+        1 {
+
+            itemArrayProcFunc = Digicademy\CagPagebrowser\Frontend\Plugin->pageNumbers
+            stepSize = {$plugin.tx_cagpagebrowser.pagenumbers.stepSize}
+            useNumbering = {$plugin.tx_cagpagebrowser.pagenumbers.useNumbering}
+
+            wrap = {$plugin.tx_cagpagebrowser.pagenumbers.wrapPageNumbers}
+
+            NO.allWrap = {$plugin.tx_cagpagebrowser.pagenumbers.wrapSingleNumber}
+
+            CUR < .NO
+            CUR = 1
+            CUR.doNotLinkIt = 1
+        }
+    }
+
+    # remove former index part
+    30 >
+
+    # NEXT part only linked when not on last page
+    40.typolink.parameter.if < .40.if
+    40.if >
+
+    _CSS_DEFAULT_STYLE (
+        div.cag_pagebrowser {margin: 2em 0 1em 0;}
+        div.cag_pagebrowser ul {list-style-type: none; margin: 0; padding: 0;}
+        div.cag_pagebrowser ul li {display: inline; text-align: center; padding-right: 1em;}
+        div.cag_pagebrowser ul ul {display: inline; padding: 0 0.5em 0 1em;}
+        div.cag_pagebrowser a {font-size: 0.8em;}
+        div.cag_pagebrowser .divider {padding: 0 0.5em;}
+    )
+}

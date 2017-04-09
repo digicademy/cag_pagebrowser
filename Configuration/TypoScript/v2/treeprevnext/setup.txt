@@ -1,0 +1,30 @@
+##########################################################
+# TypoScript Config for Tree Prevnext                    #
+##########################################################
+
+# modifications to the 'reloaded' script for treePrevNext
+plugin.tx_cagpagebrowser {
+
+    # clear uids register
+    5.10 >
+
+    # fetch uids from whole tree with userFunc
+    5.10 = USER
+    5.10 {
+        userFunc = Digicademy\CagPagebrowser\Frontend\Plugin->treePrevNext
+        excludeUids = {$plugin.tx_cagpagebrowser.excludeUidList}
+        excludeDoktypes = {$plugin.tx_cagpagebrowser.dtypes}
+        browserLoop = {$plugin.tx_cagpagebrowser.browserLoop}
+        pageNumbers = {$plugin.tx_cagpagebrowser.pageNumbers}
+    }
+    
+    # clear subsection element
+    15 >
+    
+    # modify pagenumbers element
+    40 {
+        special = list
+        special.value.data = register:treeuids
+    }
+
+}

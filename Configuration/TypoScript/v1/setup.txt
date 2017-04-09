@@ -1,0 +1,334 @@
+##########################################################
+# TypoScript Config for Pagebrowser v.1                  #
+##########################################################
+
+# include rendering class
+includeLibs.tx_cagpagebrowser = EXT:cag_pagebrowser/pi1/class.tx_cagpagebrowser.php
+
+plugin.tx_cagpagebrowser = COA
+plugin.tx_cagpagebrowser {
+
+    5 = LOAD_REGISTER
+    5.excludeUids.cObject = TEXT
+    5.excludeUids.cObject {
+        value = {$plugin.tx_cagpagebrowser.excludeUidList}
+        required = 1
+        wrap = AND uid NOT IN (|)
+    }
+
+    stdWrap.wrap = {$plugin.tx_cagpagebrowser.wrapWhole}
+
+    # link to LAST page
+
+    10 = TEXT
+    10.wrap = {$plugin.tx_cagpagebrowser.wrapLast}
+    10 {
+        # get the LAST page    (and check if it's a valid doktype, else take the last page with a valid doktype)
+        cObject = CONTENT
+        cObject {
+            table = pages
+            # this selects the last highest valid page within a SECTION
+            select {
+                pidInList.data = page:pid
+                orderBy = sorting
+                where.dataWrap = doktype NOT IN ({$plugin.tx_cagpagebrowser.dtypes}) AND deleted=0 AND hidden=0 AND nav_hide=0 {register : excludeUids}
+                begin = total-1
+            }
+            renderObj = TEXT
+            renderObj.data = field:title
+        }
+        # build the link to LAST page
+        typolink.parameter.cObject < plugin.tx_cagpagebrowser.10.cObject
+        typolink.parameter.cObject.renderObj.data = field:uid
+        typolink.ATagParams = title="{$plugin.tx_cagpagebrowser.last}"
+
+        # pagetitle overridden with browseword if true
+        cObject.stdWrap {
+
+            override.cObject = TEXT
+            override.cObject.value = {$plugin.tx_cagpagebrowser.last}
+            override.cObject.wrap = <span class="previous last"> | </span>
+
+            override.if {
+                value = 1
+                equals = {$plugin.tx_cagpagebrowser.browsewords}
+            }
+        }
+        # execute the FIRST part only if we ARE on the FIRST page in a SECTION
+        if {
+            value.data = page:sorting
+            equals.cObject = CONTENT
+            equals.cObject {
+                table = pages
+                select {
+                    pidInList.data = page:pid
+                    orderBy = sorting
+                    where = doktype NOT IN ({$plugin.tx_cagpagebrowser.dtypes}) AND deleted=0 AND hidden=0 AND nav_hide=0
+                    max = 1
+                }
+                renderObj = TEXT
+                renderObj.data = field:sorting
+            }
+        }
+    }
+
+    # link to PREVIOUS page
+
+    20 = TEXT
+    20.wrap = {$plugin.tx_cagpagebrowser.wrapPrevious}
+    20 {
+        # get a valid PREVIOUS page
+        cObject = CONTENT
+        cObject {
+                table = pages
+                select {
+                    pidInList.data = page:pid
+                    orderBy = sorting
+                    where.dataWrap = doktype NOT IN ({$plugin.tx_cagpagebrowser.dtypes}) AND sorting < {page:sorting} AND deleted=0 AND hidden=0 AND nav_hide=0 {register : excludeUids}
+                    begin = total-1
+                }
+                renderObj = TEXT
+                renderObj.data = field:title
+            }
+
+        # build link to the PREVIOUS page
+        typolink.parameter.cObject < plugin.tx_cagpagebrowser.20.cObject
+        typolink.parameter.cObject.renderObj.data = field:uid
+        typolink.ATagParams = title="{$plugin.tx_cagpagebrowser.previous}"
+
+        # pagetitle overridden with browseword if is true
+        cObject.stdWrap {
+
+            override.cObject = TEXT
+            override.cObject.value = {$plugin.tx_cagpagebrowser.previous}
+            override.cObject.wrap = <span class="previous"> | </span>
+
+            override.if {
+                value = 1
+                equals = {$plugin.tx_cagpagebrowser.browsewords}
+            }
+        }
+        # execute the PREVIOUS part only if we ARE NOT on the FIRST page in a section: returns false if content is not less than .value !!
+        if {
+            value.data = page:sorting
+            isLessThan.cObject = CONTENT
+            isLessThan.cObject {
+                table = pages
+                # this select checks for the lowest valid page in a SECTION
+                select {
+                    pidInList.data = page:pid
+                    orderBy = sorting
+                    where = doktype NOT IN ({$plugin.tx_cagpagebrowser.dtypes}) AND deleted=0 AND hidden=0 AND nav_hide=0
+                    max = 1
+                }
+                renderObj = TEXT
+                renderObj.data = field:sorting
+            }
+        }
+    }
+
+    # SUBSECTIONLINK part within pagebrowser (link to first subpage)
+
+    25 = TEXT
+    25.wrap = {$plugin.tx_cagpagebrowser.wrapSubsection}
+    25 {
+        # get the title of the first valid subpage in the SECTION
+        cObject = CONTENT
+        cObject {
+            table = pages
+            # this selects the lowest valid page among the subpages of the SECTION
+            select {
+                pidInList.data = page:uid
+                orderBy = sorting
+                where.dataWrap = doktype NOT IN ({$plugin.tx_cagpagebrowser.dtypes}) AND deleted=0 AND hidden=0 AND nav_hide=0 {register : excludeUids}
+                max = 1
+            }
+            renderObj = TEXT
+            renderObj.data = field:title
+        }
+        # build the link to the FIRST sub(page)
+        typolink.parameter.cObject < plugin.tx_cagpagebrowser.25.cObject
+        typolink.parameter.cObject.renderObj.data = field:uid
+        typolink.ATagParams = title="{$plugin.tx_cagpagebrowser.subsection}"
+
+        # pagetitle overridden with browseword if true
+        cObject.stdWrap {
+
+            override.cObject = TEXT
+            override.cObject.value = {$plugin.tx_cagpagebrowser.subsection}
+            override.cObject.wrap = <span class="subsection"> | </span>
+
+            override.if {
+                value = 1
+                equals = {$plugin.tx_cagpagebrowser.browsewords}
+            }
+        }
+
+        # insert SUBSECTION only in recursive mode and if there are subpages        
+        if {
+            isTrue.numRows {
+                table = pages
+                # this selects the lowest valid page among the subpages of the SECTION
+                select {
+                    pidInList.data = page:uid
+                    orderBy = sorting
+                    where = doktype NOT IN ({$plugin.tx_cagpagebrowser.dtypes}) AND deleted=0 AND hidden=0 AND nav_hide=0
+                    max = 1
+                }
+            }
+            value = rec
+            equals = {$plugin.tx_cagpagebrowser.browserMode}
+        }
+    }
+
+    # this is the INDEX bit (as this is a HMENU, we need not care for hidden / nav_hide)
+
+    30 = HMENU
+    30 {
+        special = browse
+        special.items = up
+        special.index.target = _self
+
+        excludeUidList = {$plugin.tx_cagpagebrowser.excludeUidList}
+
+        1 = TMENU
+        1.noBlur = 1
+        1.NO.ATagTitle.field = title
+        1.NO.allWrap = {$plugin.tx_cagpagebrowser.wrapIndex}
+
+        # pagetitle overridden with browseword if true
+        1.NO.stdWrap {
+            override.cObject = TEXT
+            override.cObject.value = {$plugin.tx_cagpagebrowser.indexword}
+            override.cObject.wrap = <span class="index">|</span>
+
+            override.if {
+                value = 1
+                equals = {$plugin.tx_cagpagebrowser.browsewords}
+            }
+        }
+    }
+
+    # link to NEXT page
+
+    40 = TEXT
+    40.wrap = {$plugin.tx_cagpagebrowser.wrapNext}
+    40 {
+        # get the NEXT valid page
+        cObject = CONTENT
+        cObject {
+                table = pages
+                select {
+                    pidInList.data = page:pid
+                    orderBy = sorting
+                    where.dataWrap = doktype NOT IN ({$plugin.tx_cagpagebrowser.dtypes}) AND sorting > {page:sorting} AND deleted=0 AND hidden=0 AND nav_hide=0 {register : excludeUids}
+                    max = 1
+                }
+                renderObj = TEXT
+                renderObj.data = field:title
+        }
+        # build the link to NEXT page
+        typolink.parameter.cObject < plugin.tx_cagpagebrowser.40.cObject
+        typolink.parameter.cObject.renderObj.data = field:uid
+        typolink.ATagParams = title="{$plugin.tx_cagpagebrowser.next}"
+
+        # pagetitle overridden with browseword is true
+        cObject.stdWrap {
+
+            override.cObject = TEXT
+            override.cObject.value = {$plugin.tx_cagpagebrowser.next}
+            override.cObject.wrap = <span class="next"> | </span>
+
+            override.if {
+                value = 1
+                equals = {$plugin.tx_cagpagebrowser.browsewords}
+            }
+        }
+
+        # execute the NEXT part only if we ARE NOT on the LAST page in a section: returns false if content is not greater than .value !!
+        if {
+            value.data = page:sorting
+            isGreaterThan.cObject = CONTENT
+            isGreaterThan.cObject {
+                table = pages
+                # this select checks for the highest valid page in a SECTION
+                select {
+                    pidInList.data = page:pid
+                    orderBy = sorting
+                    where = doktype NOT IN ({$plugin.tx_cagpagebrowser.dtypes}) AND deleted=0 AND hidden=0 AND nav_hide=0
+                    begin = total-1
+                }
+                renderObj = TEXT
+                renderObj.data = field:sorting
+            }
+        }
+    }
+
+    # link to FIRST page (we can reuse the first TS bit)
+
+    50 < .10
+    50.wrap = {$plugin.tx_cagpagebrowser.wrapFirst}
+    50 {
+        # get the FIRST page
+        cObject {
+            select {
+                begin >
+                max = 1
+            }
+        }
+        # pagetitle overridden with browseword if true
+        cObject.stdWrap {
+
+            override.cObject.value = {$plugin.tx_cagpagebrowser.first}
+            override.cObject.wrap = <span class="next last"> | </span>
+
+        }
+        # build the link to FIRST page
+        typolink.parameter.cObject {
+            select {
+                begin >
+                max = 1
+            }
+        }
+        typolink.ATagParams = title="{$plugin.tx_cagpagebrowser.first}"
+        
+        # execute the LAST part only if we ARE on the LAST page in a section
+        if {
+            value.data = page:sorting
+            equals.cObject = CONTENT
+            equals.cObject {
+                table = pages
+                # this selects the lowest valid page within a SECTION
+                select {
+                    max >
+                    pidInList.data = page:pid
+                    orderBy = sorting
+                    where = doktype NOT IN ({$plugin.tx_cagpagebrowser.dtypes}) AND deleted=0 AND hidden=0 AND nav_hide=0
+                    begin = total-1
+                }
+                renderObj = TEXT
+                renderObj.data = field:sorting
+            }
+        }
+    }
+
+    userFunc >
+
+    stdWrap {
+        if.value = 1
+        if.equals.cObject = USER
+        if.equals.cObject {
+            userFunc = Digicademy\CagPagebrowser\Frontend\Plugin->main
+            browserMode = {$plugin.tx_cagpagebrowser.browserMode}
+            excludeUidList = {$plugin.tx_cagpagebrowser.excludeUidList}
+        }
+    }
+
+    _CSS_DEFAULT_STYLE (
+        div.cag_pagebrowser {margin: 2em 0 1em 0;}
+        div.cag_pagebrowser ul {list-style-type: none; margin: 0; padding: 0;}
+        div.cag_pagebrowser ul li {display: inline; text-align: center;}
+        div.cag_pagebrowser a {font-size: 1em;}
+        div.cag_pagebrowser .divider {padding: 0 0.5em;}
+    )
+}
