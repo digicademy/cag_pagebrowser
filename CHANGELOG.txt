@@ -61,7 +61,7 @@
 		* The word for the indexlink is now configurable like all other browsewords with plugin.tx_cagpagebrowser.indexword(thx to Stefan Dumont for the feature request)
 
 0.1.2
-		* Rewrite of whole TS to so that it is now possible to exclude certain doktypes from the pagination (thx to Boris Podzeit for the feature request)
+		* Rewrite of whole TS to so that it is now possible to exclude certain doktypes from the pagination
 		* Made the basic wraps of the pagination configurable with Constant Editor
 		* Revised manual
 
